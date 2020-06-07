@@ -8,5 +8,4 @@ You can use either conda_requirements.txt or conda_requirements.txt depending on
 
 The jupyter script is intended to give a glimpse of how pyspiel (openspiel) works. It simulates 1000 games between a
 random agent who picks their next action u.a.r, and a deterministic agent who always bids the face value of the latest
-point card. Unfortunately, there is no documentation for pyspiel, so we have to understand how to use it by looking at
-the source code. So far, this has been pretty straightforward.
+point card. Unfortunately, there is no documentation for pyspiel, so Batu and I have been looking at the source code to figure out how everything works. So far, this has been pretty straightforward.
