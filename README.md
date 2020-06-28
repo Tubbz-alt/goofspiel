@@ -16,12 +16,17 @@ The jupyter script "TabQLearn_Analysis" is intended to give a platform for analy
 
 ### Coding side
 
-* CFR
+* CFR (maybe update comes too late?)
 * NFSP
 * PG
+* NE strategy (currently solved with dynamic programming)
+* If time add the python LP solver to tabular q-learning to get Minimax Q-learning (should be as simple as done in the value iteration code)
 * Way to evaulate learned strategies
+
 
 ### Paper side
 
-* Sections 1 & 2
+* Sections 1 & 2: Maybe one section only?
+* Section 3: NE, minimax search, dynamic programming
 * Section 4: Algorihms. For each tested algorithm, a summary of how it works and experiment results
+* Section 5: Experiments
