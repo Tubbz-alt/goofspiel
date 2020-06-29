@@ -19,9 +19,9 @@ The jupyter script "TabQLearn_Analysis" is intended to give a platform for analy
 * CFR (maybe update comes too late?)
 * NFSP
 * PG
-* NE strategy (currently solved with dynamic programming)
+(Andreas)* NE strategy (currently solved with dynamic programming)
 * If time add the python LP solver to tabular q-learning to get Minimax Q-learning (should be as simple as done in the value iteration code)
-* Way to evaulate learned strategies
+* Way to evaulate learned strategies -> maybe write some arena where we can load different players?
 
 
 ### Paper side
