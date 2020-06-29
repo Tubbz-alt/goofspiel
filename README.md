@@ -11,3 +11,22 @@ random agent who picks their next action u.a.r, and a deterministic agent who al
 point card. Unfortunately, there is no documentation for pyspiel, so Batu and I have been looking at the source code to figure out how everything works. So far, this has been pretty straightforward.
 
 The jupyter script "TabQLearn_Analysis" is intended to give a platform for analysing how an agent trained with a tabular q learning algorithm performs against random agents and against humans.
+
+## TO-DO
+
+### Coding side
+
+* CFR (maybe update comes too late?)
+* NFSP
+* PG
+(Andreas)* NE strategy (currently solved with dynamic programming)
+* If time add the python LP solver to tabular q-learning to get Minimax Q-learning (should be as simple as done in the value iteration code)
+* Way to evaulate learned strategies -> maybe write some arena where we can load different players?
+
+
+### Paper side
+
+* Sections 1 & 2: Maybe one section only?
+* Section 3: NE, minimax search, dynamic programming
+* Section 4: Algorihms. For each tested algorithm, a summary of how it works and experiment results
+* Section 5: Experiments
