@@ -35,7 +35,7 @@ import sys
 
 
 # Calculate values with value iteration:
-def solve_goofspiel(num_cards=3, ):
+def solve_goofspiel(num_cards=3):
   """Solves goofspiel.
 
   Returns:
@@ -103,7 +103,7 @@ class ValueItAgent(rl_agent.AbstractAgent):
     key = str(state)
     states = {key: state}
     transitions = {}
-    value_iteration._initialize_maps(states, self.values, transitions)
+    value_iteration._initialize_maps(states, self._values, transitions)
     for p0action in state.legal_actions(0):
       # new row
       p0_utils.append([])
@@ -119,18 +119,19 @@ class ValueItAgent(rl_agent.AbstractAgent):
     solution = lp_solver.solve_zero_sum_matrix_game(stage_game)
     probs = solution[0]
     actions = state.legal_actions(0) # double check that order is consistent with probs
-    policies = actions, probs
+    return actions, probs
 
-  def step(self, time_step):
+  def step(self, time_step, state):
     """Returns the action to be taken.
 
       Args:
         time_step: an instance of rl_environment.TimeStep.
+        state: should be able to recover this from time_step but dont know how.. therefore we just add this argument
 
       Returns:
         A `rl_agent.StepOutput` containing the action probs and actions.
     """
-    state = time_step.observations["info_state"][self._player_id]
+    # state = time_step.observations["info_state"][self._player_id]
     legal_actions = time_step.observations["legal_actions"][self._player_id]
 
     # Prevent undefined errors if this agent never plays until terminal step
@@ -139,7 +140,9 @@ class ValueItAgent(rl_agent.AbstractAgent):
     # Act step: don't act at terminal states.
     if not time_step.last():
       actions, probs = self._matrix_game(state)
-      action = np.random.choice(range(self._num_actions), p=probs)
+      probs = abs(np.array(probs).flatten()) # convert to np.array and make sure they are positive (small negative outputs)
+      probs = probs / sum(probs) # make sure they are properly normalized
+      action = np.random.choice(actions, p=probs)
 
     return rl_agent.StepOutput(action=action, probs=probs)
 
@@ -198,19 +201,20 @@ def main(argv):
   del argv
 
   # calculate state values:
-  num_cards = 3
+  num_cards = 4
   values = solve_goofspiel(num_cards)
 
   # setup environment:
   game = pyspiel.load_game('goofspiel(imp_info=False,num_cards={})'.format(num_cards))
   env = rl_environment.Environment(game)
-  state_size = env.observation_spec()["info_state"][0]
   num_actions = env.action_spec()["num_actions"]
 
   # define agent:
   value_it_agent = ValueItAgent(0, num_actions, values)
 
   # play against human:
+  print("=============================")
+  print("play against optimal player: ")
   while True:
     logging.info("You are playing as player 1: ")
     time_step = env.reset()
@@ -218,18 +222,18 @@ def main(argv):
 
       # print current state:
       curr_state = env.get_state
-      print(curr_state)
-      print(time_step.observations['info_state'][0])
+      print("Next turn. Current state is: ")
+      print(str(curr_state))
+
+      # value it player:
+      agent_out = value_it_agent.step(time_step, curr_state)
+      logging.info("\n%s", agent_out.probs)
+      p0_action = agent_out.action
+      logging.info('Agent 0 played: {}'.format(p0_action + 1))
 
       # human player:
       p1_action = command_line_action(time_step)
       logging.info('Agent 1 played: {}'.format(p1_action + 1))
-
-      # value it player:
-      agent_out = value_it_agent.step(time_step)
-      logging.info("\n%s", agent_out.probs)
-      p0_action = agent_out.action
-      logging.info('Agent 0 played: {}'.format(p0_action + 1))
 
       # print(time_step.observations['info_state'][0])
       # print(time_step.observations['info_state'][1])
@@ -254,14 +258,13 @@ def main(argv):
     # logging.info("\n%s", pretty_board(time_step))
 
     logging.info("End of game!")
-    if time_step.rewards[human_player] > 0:
+    if time_step.rewards[1] > 0:
       logging.info("You win")
-    elif time_step.rewards[human_player] < 0:
+    elif time_step.rewards[1] < 0:
       logging.info("You lose")
     else:
       logging.info("Draw")
-    # Switch order of players
-    human_player = 1 - human_player
+
   time_step = env.reset()
 
 
