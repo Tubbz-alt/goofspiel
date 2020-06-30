@@ -30,6 +30,7 @@ from open_spiel.python.algorithms import value_iteration
 from open_spiel.python import rl_agent
 from open_spiel.python import rl_tools
 from open_spiel.python.algorithms import lp_solver
+from open_spiel.python.algorithms import random_agent
 import logging
 import sys
 
@@ -197,11 +198,13 @@ def evaluate_bots(state, bots, rng):
 
 
 
+
+
 def main(argv):
   del argv
 
   # calculate state values:
-  num_cards = 3
+  num_cards = 5
   values = solve_goofspiel(num_cards)
 
   # setup environment:
@@ -211,19 +214,28 @@ def main(argv):
 
   # define agent:
   value_it_agent = ValueItAgent(0, num_actions, values)
+  rand_agent = random_agent.RandomAgent(player_id=1, num_actions=num_actions)
 
   # play against human:
   print("=============================")
-  print("play against optimal player: ")
-  while True:
-    logging.info("You are playing as player 1: ")
+  num_episodes = 1000
+  wins = 0
+  draws = 0
+  logging.info(
+      "Playing goofspiel with {} cards over {} episodes. value_it_agent (p0) vs. random_agent (p1)".format(num_cards,
+                                                                                                           num_episodes))
+  for i in range(num_episodes):
+
+    logging.info("episode {}".format(i))
     time_step = env.reset()
+
     while not time_step.last():
 
       # print current state:
       curr_state = env.get_state
-      print("Next turn. Current state is: ")
-      print(str(curr_state))
+      # print("Next turn. Current state is: ")
+      # print(str(curr_state))
+      logging.info(str(curr_state))
 
       # value it player:
       agent_out = value_it_agent.step(time_step, curr_state)
@@ -232,7 +244,8 @@ def main(argv):
       logging.info('Agent 0 played: {}'.format(p0_action + 1))
 
       # human player:
-      p1_action = command_line_action(time_step)
+      agent_out = rand_agent.step(time_step)
+      p1_action = agent_out.action
       logging.info('Agent 1 played: {}'.format(p1_action + 1))
 
       # print(time_step.observations['info_state'][0])
@@ -252,7 +265,6 @@ def main(argv):
       # logging.info('Point Card (Middle Card): %d', curr)
       #
 
-
       time_step = env.step([p0_action, p1_action])
 
     # logging.info("\n%s", pretty_board(time_step))
@@ -265,7 +277,15 @@ def main(argv):
     else:
       logging.info("Draw")
 
-  time_step = env.reset()
+    if time_step.rewards[0] > 0:
+        wins += 1
+    if time_step.rewards[0] == 0:
+        draws += 1
+
+    p0_win = wins / num_episodes
+
+    logging.info("Summary: ==============")
+    logging.info("Wins: {}, Draws: {}, Estimated pwin: {}".format(wins, draws, p0_win))
 
 
 
